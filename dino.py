@@ -10,7 +10,6 @@ import pygame
 WIDTH = 623
 HEIGHT = 150
 
-
 #inicio do game
 pygame.init()
 
@@ -19,7 +18,7 @@ pygame.mixer.init()
 
 
 #setar Tamanho da tela
-screen = pygame.display.set_mode( (WIDTH, HEIGHT) )
+Tela = pygame.display.set_mode( (WIDTH, HEIGHT) )
 
 #nome do jogo Titulo
 pygame.display.set_caption('Jogo do dinossauro')
@@ -46,13 +45,16 @@ class BG:
             self.x = WIDTH  #o objeto é reposicionado para a posição inicial na extremidade direita da tela
 
     def show(self):
-        screen.blit(self.texture, (self.x, self.y))
+        Tela.blit(self.texture, (self.x, self.y))
 
     #importando background game
     def set_texture(self):
         path = os.path.join('assets/images/bg.png')
         self.texture = pygame.image.load(path) #Essa função retorna um objeto que representa a imagem carregada.
         self.texture = pygame.transform.scale(self.texture, (self.width, self.height)) #carrega a imagem da textura, redimensiona-a para as dimensões desejadas
+
+
+
 
 #Classe dino
 class Dino:
@@ -118,7 +120,7 @@ class Dino:
         
 
     def show(self):
-        screen.blit(self.texture, (self.x, self.y))
+        Tela.blit(self.texture, (self.x, self.y))
 
     #carrega texturas do dino
     def set_texture(self):
@@ -146,6 +148,7 @@ class Dino:
         self.onground = True # True para indicar que o dinossauro está no chão novamente
 
 
+
 #Classe cacto
 class Cactus:
 
@@ -166,13 +169,14 @@ class Cactus:
 
     # desenha a textura do cacto na tela
     def show(self):
-        screen.blit(self.texture, (self.x, self.y))
+        Tela.blit(self.texture, (self.x, self.y))
 
     # é responsável por carregar a imagem do cacto e redimensioná-la para o tamanho desejado
     def set_texture(self):
         path = os.path.join('assets/images/cactus.png')
         self.texture = pygame.image.load(path)
         self.texture = pygame.transform.scale(self.texture, (self.width, self.height))
+
 
 
 #Classe colisao
@@ -185,44 +189,8 @@ class Collision:
         return distance < 35  # retorna True se a distância entre eles for menor que 35, indicando uma colisão
 
 
-#Classe Score
-class Score:
-    
-    #O construtor da classe inicializa os atributos da pontuação
-    def __init__(self, hs):
-        self.hs = hs #hs é a pontuação máxima
-        self.act = 0 # armazena a pontuação atual em tempo real
-        self.font = pygame.font.SysFont('monospace', 18) # define a fonte usada para exibir a pontuação na tela
-        self.color = (0, 0, 0) # Define a cor da letra utilizada na pontuação
-        self.set_sound() #Chama som a cada 100 Pontos
-        self.show() #exibe a pontuação atual na tela
 
-    # Metodo update é atualizada com base no número de loops passado como argumento
-    def update(self, loops):
-        self.act = loops // 10 # a divisão por 10 é usada para determinar como a pontuação aumenta ao longo do tempo
-        self.check_hs() # é chamado para verificar se a pontuação atual é maior do que a pontuação máxima
-        self.check_sound() #  é chamado para verificar se a pontuação atual atinge um valor múltiplo de 100 (TIRANDO 0)
 
-    #Exibe 
-    def show(self):
-        self.lbl = self.font.render(f'HI {self.hs} {self.act}', 1, self.color) #a pontuação atual e a pontuação máxima são renderizadas como uma string na superfície da tela
-        lbl_width = self.lbl.get_rect().width #  onde hs é substituído pelo valor da pontuação máxima e act é substituído pelo valor da pontuação atual.
-        screen.blit(self.lbl, (WIDTH - lbl_width - 10, 10)) # a imagem da string é exibida na tela usando o método blit() da superfície da tela
-                                                  # a posição é alinhada à direita da tela, com uma margem de 10 pixels a partir da borda direita
- 
-    #o som é carregado a partir de um arquivo de áudio
-    def set_sound(self):
-        path = os.path.join('assets/sounds/point.wav')
-        self.sound = pygame.mixer.Sound(path)
-        
-    #    
-    def check_hs(self):
-        if self.act >= self.hs: # a pontuação atual é comparada com a pontuação máxima
-            self.hs = self.act #Se a pontuação atual for maior ou igual à pontuação máxima, a pontuação máxima é atualizada para o valor da pontuação atual.
-
-    def check_sound(self):
-        if self.act % 100 == 0 and self.act != 0: # é verificado se a pontuação atual é um múltiplo de 100 e diferente de zero
-            self.sound.play() #Se essa condição for atendida, o som é reproduzido chamando o método Play()
 
 
 #Classe Jogo
@@ -234,7 +202,6 @@ class Game:
         self.dino = Dino() # Cria uma instância do objeto Dino, que representa o personagem principal do jogo.
         self.obstacles = [] #Cria uma lista vazia que será usada para armazenar os obstáculos do jogo.
         self.collision = Collision() # Cria uma instância do objeto Collision, que será usado para verificar colisões entre objetos no jogo.
-        self.score = Score(hs) #Cria uma instância do objeto Score, que é responsável por controlar a pontuação do jogo
         self.speed = 3 # Define a velocidade do jogo como 3. Esse valor pode ser ajustado para controlar a dificuldade do jogo.
         self.playing = False # Define a variável playing como False, indicando que o jogo ainda não começou.
         self.set_sound() # Configura o som do jgo
@@ -260,8 +227,8 @@ class Game:
 
     def over(self): #é chamado quando o jogador perde o jogo. Ele reproduz o som de perda, exibe as etiquetas de texto "GAME OVER" 
         self.sound.play()
-        screen.blit(self.big_lbl, (WIDTH // 2 - self.big_lbl.get_width() // 2, HEIGHT // 4))#e "press r to restart" na tela e define o atributo playing como False, indicando que o jogo acabou.
-        screen.blit(self.small_lbl, (WIDTH // 2 - self.small_lbl.get_width() // 2, HEIGHT // 2))
+        Tela.blit(self.big_lbl, (WIDTH // 2 - self.big_lbl.get_width() // 2, HEIGHT // 4))#e "press r to restart" na tela e define o atributo playing como False, indicando que o jogo acabou.
+        Tela.blit(self.small_lbl, (WIDTH // 2 - self.small_lbl.get_width() // 2, HEIGHT // 2))
         self.playing = False
 
     def tospawn(self, loops): #é utilizado para determinar se é o momento de criar um novo cacto. 
@@ -283,7 +250,12 @@ class Game:
 
 
     def restart(self): # metodo reinicia o jogo
-        self.__init__(hs=self.score.hs) # hama Ele chama o método __init__() passando o valor atual de self.score.hs como argumento para reinicializar
+        self.__init__() # hama Ele chama o método __init__() passando o valor atual de self.score.hs como argumento para reinicializar
+
+
+
+
+
 
 
 # é responsável por executar o loop principal do jogo
@@ -331,9 +303,6 @@ def main():
             if over:
                 game.over() # Se over for True, chama o método game.over() para exibir a tela de game over.
 
-            # As atualizações e exibições da pontuação (game.score) são feitas.
-            game.score.update(loops)
-            game.score.show()
 
         # events
         for event in pygame.event.get():
@@ -360,5 +329,4 @@ def main():
         pygame.display.update() # é chamado para atualizar a tela do jogo com as alterações feitas.
 
         
-
 main() # é o ponto de entrada do programa e é responsável por executar o jogo.
